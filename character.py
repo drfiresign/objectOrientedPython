@@ -49,3 +49,6 @@ class Character(Combat):
 
     def leveled_up(self):
         return self.experience >= 5
+
+    def print_hp(self):
+        print("You have {} HP left".format(self.hit_points))
