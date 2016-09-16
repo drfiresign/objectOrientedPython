@@ -2,6 +2,7 @@ from character import Character
 from monster import Dragon
 from monster import Goblin
 from monster import Troll
+from sys import exit
 
 
 class Game:
@@ -17,86 +18,73 @@ class Game:
             return None
 
     def monster_turn(self):
-        # check to see if the monster attackes
         if self.monster.attack():
-            # if so, tell player
-            print("You're being attacked!")
-            # check if the player wants to dodge
-            d = input("Do you want to dodge? [Y]es or [N]o?\n")
-            # if so, see if the dodge is sucessful
-            if d.lower() == 'y':
+            print("{} is attacking!".format(self.monster))
+            d = input("Dodge? Y/N ").lower()
+            if d == 'y':
                 if self.player.dodge():
-                    print("You dodged!")
+                    print("You dodged the attack!")
                     print("What a lucky break!")
                 else:
-                    print("Your dodge failed and you were attacked")
+                    print("You got hit anyway!")
                     self.player.hit_points -= 1
                     self.player.print_hp()
             else:
                 print("Unless you've accepted death, you should ALWAYS dodge!")
-                print("You were attacked! Idiot...")
+                print("{} hit you for 1 point!".format(self.monster))
                 self.player.hit_points -= 1
                 self.player.print_hp()
-                # if it is, move on
-            # if it's not, remove one player hit point
-            # if the monster isn't attacking, tell the player
         else:
-            print("The monster was confused, and mistook you for a tree.")
+            print("{} isn't attacking this turn.".format(self.monster))
 
     def player_turn(self):
-        # let the player attack, rest or quit
-        action = input("Would you like to [A]ttack, [R]est or [Q]uit?")
-        # if they attack
+        action = input("Would you like to [A]ttack, [R]est or [Q]uit?").lower()
         if action == "a":
-            # see if it's sucessful
+            print("You're attacking {}!".format(self.monster))
             if self.player.attack():
-                # see if the monster dodged
                 if self.monster.dodge():
-                    # if dodged, print that
-                    print("The {} dodged your attack!".format(
-                        self.monster.__name__))
-                # if not dodged, subtrace num of hit points from monster
+                    print("{} dodged your attack!".format(self.monster))
                 else:
-                    self.monster.hit_points -= 1
-            # if not a good attack, tell the player
+                    if self.player.leveled_up():
+                        self.monster.hit_points -= 2
+                    else:
+                        self.monster.hit_points -= 1
+                    print("You hit {} with your {}".format(self.monster,
+                                                           self.player.weapon))
             else:
-                print("You were too scared to attack this turn.")
-        # if they rest:
+                print("You missed!")
         elif action == "r":
-            # call the player.rest() method
             self.player.rest()
         elif action == "q":
             print("Quitting now. Thanks for visiting!")
-            # if they quit, exit the game
             exit()
-        # if they pick anything else rerun this method
         else:
             self.player_turn()
 
     def cleanup(self):
-        # if the monster has no more hit points:
         if self.monster.hit_points <= 0:
-            # up the player's experience
-            self.player.experience += 1
-            # print a message
-            print("Congratulations! You defeated the {}!".format(self.monster))
-            print("You've gained 1 experience too!")
-            # get a new monster
+            self.player.experience += self.monster.experience
+            print("Congratulations! You defeated {}!".format(self.monster))
+            print("You've gained {} experience too!".format(
+                self.monster.experience))
             self.monster = self.get_next_monster()
 
     def __init__(self):
         self.setup()
-
         while self.player.hit_points and (self.monster or self.monsters):
+            print("\n" + "=" * 20)
             print(self.player)
             self.monster_turn()
+            print('-' * 20)
             self.player_turn()
             self.cleanup()
+            print("\n" + "=" * 20)
 
         if self.player.hit_points:
             print("You Win!")
         elif self.monsters or self.monster:
             print("You Lose!")
+            exit()
 
 
-game = Game()
+Game()
