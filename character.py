@@ -1,4 +1,7 @@
-class Character():
+from combat import Combat
+
+
+class Character(Combat):
     """docstring for Character."""
     experience = 0
     hit_points = 10
@@ -14,6 +17,8 @@ class Character():
             else:
                 return "bow"
         else:
+            print("Your benefactor isn't that wealthy.")
+            print("You need to pick from the following options:")
             return self.get_weapon()
 
     def __init__(self, **kwargs):
